@@ -1,13 +1,14 @@
-package com.database;
+package DatabaseExamples;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
-public class PreparedStatementDB {
+public class PreparedStatementWithExcelIntegration {
 
-	public static void main(String args[]) throws Exception {
+	public static void main(String[] args) throws Exception {
 		Connection con = DataBaseConnect.getConnection();
 		PreparedStatement stmt=con.prepareStatement("insert into test123 values(?,?,?)");  
 		stmt.setString(1,"Karthick");//1 specifies the first parameter in the query  
