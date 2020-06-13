@@ -1,0 +1,24 @@
+Java 8  can have the interface methods defined 
+ Usage of functional programming
+ StreamAPI helps in concurrency and functional programming
+ 
+until Java 7 we can only declare methods in the interface but cant define them
+Stream API is added with List interface in Java8
+
+Nessesity to implement defining a method inside the interface is as follows
+		
+		Lets say the List interface has x methods when the stream api method is added with the interface without
+		defining them then all the classes that has already implemented the List interface will need this Stream API
+		method defined which cant be done as the software product is already rendered with lower versions of Java(1-7)
+		
+		
+		
+Declaring a Default will help us define a method inside the interface
+
+
+The Folder InterfaceDefinitionandImplementation contains an exercise to check the interface definition and
+the usage of static methods in java8
+
+
+In the Internal Interations we use the consumer Interface which is a functional interface(Can have only one method)
+ie the consumer interface has only one method called accept
