@@ -1,0 +1,147 @@
+package test;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+
+
+public class StockMock1 {
+	static WebDriver driver = null;
+	static int round(int n)
+	{
+		// Smaller multiple
+		int a = (n / 50) * 50;
+		System.out.println(a);
+		// Larger multiple
+		int b = a + 50;
+		System.out.println(b);
+
+		// Return of closest of two
+		return (n - a > b - n)? b : a;
+	}
+
+
+	public static void main(String[] args) throws InterruptedException, Exception {
+		System.setProperty("webdriver.chrome.driver","C:\\Users\\Nithin\\eclipse-workspace\\Stockmock\\Driver\\chromedriver.exe");	
+		driver = new ChromeDriver();
+		String baseUrl = "https://www.stockmock.in/#!/";
+		driver.get(baseUrl);
+		driver.manage().window().maximize();
+
+		XSSFWorkbook workbook = new XSSFWorkbook();
+		XSSFCellStyle style1 = workbook.createCellStyle();
+
+		XSSFRow row;
+		String IV_Putdata=null;
+		String IV_Calldata=null;
+
+		Map < Integer, Object[] > stockinfo = new TreeMap < Integer, Object[] >();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		driver.findElement(By.xpath("//*[@id='user-phone-no']")).sendKeys("8825121979");
+		driver.findElement(By.xpath("//*[@type='password']")).sendKeys("Siechem@123");
+		Thread.sleep(5000);
+		driver.findElement(By.xpath("//button[@class='__button']")).click();
+		Thread.sleep(5000);
+		driver.navigate().to("https://www.stockmock.in/#!/simulator");
+
+		Thread.sleep(20000);
+		String spot_val_String = driver.findElement(By.xpath("(//*[@style='color: rgb(102, 102, 102);'])[2]")).getText();
+		spot_val_String =spot_val_String.substring(1,8);
+		double spot_val_int =Double.parseDouble(spot_val_String);
+		System.out.println("SPot price"+spot_val_int);
+		double a=spot_val_int;
+		int b;
+		b=(int)a;
+		int spt_price=round(b);
+		//position taking
+		driver.findElement(By.xpath("//*[text()='"+spt_price+" ']//preceding::button[1]")).click();
+		driver.findElement(By.xpath("//*[text()='"+spt_price+" ']//following::button[2]")).click();
+		Thread.sleep(2000);
+		driver.findElement(By.xpath("(//*[@placeholder=\"1\"])[1]")).sendKeys("0");
+		driver.findElement(By.xpath("(//*[@placeholder=\"1\"])[2]")).sendKeys("0");
+		driver.findElement(By.xpath("(//*[@class=\"simulator_s_button\"])[1]")).click();
+		driver.findElement(By.xpath("//*[@id=\"root\"]/div[3]/div/div/div[2]/div/div[2]/div[1]/div[1]/select[2]/option[5]")).click();
+		driver.findElement(By.xpath("//*[@class=\"bi bi-play-circle\"]")).click();
+
+		String calldata = driver.findElement(By.xpath("(//*[@type='number'])[2]//preceding::td[3]")).getText();
+		String call_val = calldata.substring(0,8);
+		call_val =call_val.replaceAll("[\\[\\](){}]","");
+		String putdata = driver.findElement(By.xpath("(//*[@type='number'])[4]//preceding::td[3]")).getText();
+		String put_val = putdata.substring(0,8);
+		put_val =put_val.replaceAll("[\\[\\](){}]","");
+		String date_val= driver.findElement(By.xpath("(//*[@style='text-decoration: underline;'])[1]")).getText();
+		date_val =date_val.substring(0,7);
+		stockinfo.put( 1, new Object[] {
+				"Timestamp", "Spot Price", "Profit/Loss",calldata,"Call IV","Call Position",putdata,"Put_IV","Put position"});
+		System.out.println(calldata);
+		System.out.println(putdata);
+		String Spreadsheetname =date_val+call_val+"_"+put_val;
+		XSSFSheet spreadsheet = workbook.createSheet(Spreadsheetname);
+		IV_Putdata=put_val.substring(0,5);
+		IV_Calldata=call_val.substring(0,5);
+
+		Thread.sleep(3000);
+		for(int i =2;i<120;i++){
+			String spot = driver.findElement(By.xpath("(//*[@style='color: rgb(102, 102, 102);'])[2]")).getText();
+			spot =spot.substring(1,8);
+			String pl = driver.findElement(By.xpath("//*[@id=\"root\"]/div[3]/div/div/div[2]/div/div[2]/div[2]/div[2]/div[1]/span[2]")).getText();
+			String time= driver.findElement(By.xpath("(//*[@style='text-decoration: underline;'])[1]")).getText();
+			String call_option_price = driver.findElement(By.xpath("(//*[@type='number'])[2]//preceding::td[2]")).getText();
+			String put_option_price = driver.findElement(By.xpath("(//*[@type='number'])[4]//preceding::td[2]")).getText();
+			String Ce_profit =call_option_price.substring(0,6);
+			Ce_profit= Ce_profit.replaceAll("[\\[\\](){}]",""); 
+			String Ce_position =call_option_price.substring(6);
+			Ce_position =Ce_position.replaceAll("[\\[\\](){}]","");
+			String Pe_profit =put_option_price.substring(0,6);
+			Pe_profit= Pe_profit.replaceAll("[\\[\\](){}]","");
+			String Pe_position =put_option_price.substring(6);
+			Pe_position =Pe_position.replaceAll("[\\[\\](){}]","");
+			String Put_IV = driver.findElement(By.xpath("//*[text()='"+IV_Putdata+" ']//following::td[1]")).getText();
+			String Call_IV = driver.findElement(By.xpath("//*[text()='"+IV_Calldata+" ']//preceding::td[1]")).getText();
+
+			System.out.println(time+" :Spot price"+spot+"  pl  "+pl+" Call data :"+Ce_profit+" "+" Call Iv"+Call_IV+" "+Ce_position+" Put data "+Pe_profit+" "+"Put IV"+Put_IV+" "+Pe_position);
+			stockinfo.put( i, new Object[] {
+					time,spot,pl,Ce_profit,Call_IV,Ce_position,Pe_profit,Put_IV,Pe_position});
+			Thread.sleep(5000);
+		}
+		Set<Integer> keyid = stockinfo.keySet();
+		int rowid = 0;
+
+		for (Integer key : keyid) {
+			spreadsheet.setColumnWidth(0, 6000);
+			row = spreadsheet.createRow(rowid++);
+			Object [] objectArr =stockinfo.get(key);
+			int cellid = 0;
+
+			for (Object obj : objectArr){
+				Cell cell = row.createCell(cellid++);
+				cell.setCellValue((String)obj);
+			}
+		}
+
+		FileOutputStream out = new FileOutputStream(
+				new File("C:\\Users\\Nithin\\Desktop\\Stockbacktesting\\December\\"+Spreadsheetname+".xlsx"));
+
+		workbook.write(out);
+		out.close();
+		System.out.println("Writesheet.xlsx written successfully");
+
+	}}
